@@ -1,56 +1,60 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
 import numpy as np
 from threading import Lock
-
-import rospy
-from rotors_comm.msg import PPComTopology
-from importlib import import_module
-from caric_mission.srv import CreatePPComTopic
-
 import threading
-
+import importlib
 import random
 import string
 
-# The topology to determine whether topic can be relayed
-ppcomTopo = None
+import rclpy
+from rclpy.node import Node
+from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
+from rotors_comm_msgs.msg import PPComTopology
+from caric_mission.srv import CreatePPComTopic
+
+
 class PPComAccess:
+    """Class to handle PPCom topology access and line-of-sight calculations"""
     
     def __init__(self, topo):
-        self.lock       = Lock()
-        self.topo       = topo
-        self.node_id    = topo.node_id
+        self.lock = Lock()
+        self.topo = topo
+        self.node_id = topo.node_id
         self.node_alive = topo.node_alive
-        self.Nnodes     = len(topo.node_id)
-        self.adjacency  = self.rangeToLinkMat(self.topo.range, self.Nnodes)
+        self.Nnodes = len(topo.node_id)
+        self.adjacency = self.range_to_link_mat(topo.range, self.Nnodes)
 
-    def rangeToLinkMat(self, distances, N):    
-        linkMat = np.zeros([N, N])
+    def range_to_link_mat(self, distances, N):
+        """Convert range array to adjacency matrix"""
+        link_mat = np.zeros([N, N])
         range_idx = 0
         for i in range(0, N):
             for j in range(i+1, N):
-                linkMat[i, j] = distances[range_idx]
-                linkMat[j, i] = linkMat[i, j]
+                link_mat[i, j] = distances[range_idx]
+                link_mat[j, i] = link_mat[i, j]
                 range_idx += 1
-        return linkMat
+        return link_mat
 
     def update(self, topo):
+        """Update topology with new data"""
         self.lock.acquire()
         self.node_alive = topo.node_alive
-        self.adjacency  = self.rangeToLinkMat(topo.range, self.Nnodes)
+        self.adjacency = self.range_to_link_mat(topo.range, self.Nnodes)
         self.lock.release()
 
-    def getAdj(self):
+    def get_adj(self):
+        """Get current adjacency matrix"""
         self.lock.acquire()
-        adj = self.adjacency
+        adj = self.adjacency.copy()
         self.lock.release()
         return adj
     
-    def getSimpleAdj(self):
+    def get_simple_adj(self):
+        """Get binary adjacency matrix (0 or 1)"""
         self.lock.acquire()
-        adj = self.adjacency
+        adj = self.adjacency.copy()
         self.lock.release()
         
         for i in range(0, adj.shape[0]):
@@ -59,189 +63,229 @@ class PPComAccess:
                     adj[i][j] = 1
                 else:
                     adj[i][j] = 0
-
         return adj
 
 
-# Dictionary to relay data from one topic to others
-topic_to_dialogue = {}
 class Dialogue:
+    """Class to manage communication dialogue for a specific topic"""
     
-    def __init__(self, topic, sub, source, callerid):
+    def __init__(self, topic, source, node_name):
         self.topic = topic
-        self.sub = sub
-        self.callerids_to_source = {callerid : source}
+        self.sources_to_node_name = {node_name: source}
         self.target_to_pub = {}
         self.permitted_edges = set()
 
-    def addTarget(self, target, pub):
+    def add_target(self, target, pub):
+        """Add a target node with its publisher"""
         self.target_to_pub[target] = pub
 
-    def addSource(self, source, callerid):
-        self.callerids_to_source[callerid] = source
+    def add_source(self, source, node_name):
+        """Add a source node mapping"""
+        self.sources_to_node_name[node_name] = source
 
-    def addPermittedEdge(self, edge):
+    def add_permitted_edge(self, edge):
+        """Add a permitted communication edge"""
         self.permitted_edges.add(edge)
 
 
-# Mutex for the dialogue dictionary
-dialogue_mutex = threading.Lock()
-
-
-# Update the topology
-def TopologyCallback(msg):
-
-    # print(type(msg.node_alive), len(msg.node_alive))
-
-    global ppcomTopo
-    ppcomTopo.update(msg)
+class PPComRouter(Node):
+    """Main PPCom Router Node for ROS2"""
     
-    # print("\nLOS:")
-    # adj = ppcomTopo.getSimpleAdj()
-    # for arr in adj:
-    #     print(arr)
-
-
-# Relay the message
-def DataCallback(msg):
-    
-    if ppcomTopo == None:
-        print("ppcom topo not set yet")
-
-    conn_header = msg._connection_header
-    
-    topic = conn_header['topic']
-    callerid = conn_header['callerid']
-
-    try:
-        source_node = topic_to_dialogue[topic].callerids_to_source[callerid]
-    except:
-        print("Missing key: ", callerid)
-        print(topic_to_dialogue.keys())
-        print(topic_to_dialogue[topic].callerids_to_source.keys())
-        return
-
-    # print(f"Msg from callerid {conn_header['callerid']}. Topic: {conn_header['topic']}. Size: {len(msg._buff)}")
-
-    # if callerid not in topic_to_dialogue[topic].callerids_to_source.keys():
-    #     return
-
-    adjacency = ppcomTopo.getAdj()
-    
-    for target_node in ppcomTopo.node_id:
-
-        # Skip if target node is the same as source node
-        if target_node == source_node:
-            continue
-
-        i = ppcomTopo.node_id.index(source_node)
-        j = ppcomTopo.node_id.index(target_node)
-
-        if i >= len(ppcomTopo.node_alive) or j >= len(ppcomTopo.node_alive):
-            continue
-
-        # print(f"Checking index {i}, {j}. Nodes {len(ppcomTopo.node_alive)}. Buf: {len(ppcomTopo.topo.node_alive)}")
-        # print(f"Checking node_alive[i] {ppcomTopo.node_alive[i]},\nnode_alive[j] {ppcomTopo.node_alive[j]}.")
-
-        # Skip if either node is dead
-        if not ppcomTopo.node_alive[i] or not ppcomTopo.node_alive[j]:
-            continue
-
-        # Skip if there is no line of sight between node
-        if adjacency[i, j] <= 0.0:
-            continue
+    def __init__(self):
+        super().__init__('ppcom_router')
         
-        # If edege is not permitted, skip
-        if (callerid, target_node) not in topic_to_dialogue[topic].permitted_edges:
-            # print((callerid, target_node), "is not in pe: ", topic_to_dialogue[topic].permitted_edges)
-            continue
-
-        # if (i == 1 and j == 3) or (i == 3 and j == 1):
-        #     print("adj_13: ", adjacency[i, j])
+        # Initialize class variables
+        self.ppcom_topo = None
+        self.topic_to_dialogue = {}
+        self.dialogue_mutex = threading.Lock()
         
-        # Publish the message on derived topics
-        topic_to_dialogue[topic].target_to_pub[target_node].publish(msg)
-
-    # print(f"Receive msg under {route[0]}. From {route[1]} to {route[2]}. CallerID: {conn_header['callerid']}")
-
-
-# Create a topic over the ppcom network
-def CreatePPComTopicCallback(req):
-    
-    global topic_to_dialogue
-
-    try:
+        # Set up QoS profile for reliable communication
+        qos_profile = QoSProfile(
+            reliability=ReliabilityPolicy.RELIABLE,
+            history=HistoryPolicy.KEEP_LAST,
+            depth=10
+        )
         
-        callerid = req._connection_header['callerid']
-        source   = req.source
-        targets  = req.targets
-        topic    = req.topic_name
-        package  = req.package_name
-        message  = req.message_type
+        # Create subscription to topology updates
+        self.topology_sub = self.create_subscription(
+            PPComTopology,
+            '/ppcom_topology_doa',
+            self.topology_callback,
+            qos_profile
+        )
+        
+        # Create service for creating PPCom topics
+        self.create_topic_service = self.create_service(
+            CreatePPComTopic,
+            'create_ppcom_topic',
+            self.create_ppcom_topic_callback
+        )
+        
+        # Wait for initial topology message
+        self.get_logger().info("PPCom Router started! Waiting for initial topology...")
+        self.wait_for_initial_topology()
+        
+        self.get_logger().info("PPCom Router initialized successfully!")
 
-        print(f"Receiving request from {callerid}. Source {source}. Target {targets}")
+    def wait_for_initial_topology(self):
+        """Wait for the first topology message to initialize the network"""
+        # Create a temporary subscription to get the first message
+        temp_sub = self.create_subscription(
+            PPComTopology,
+            '/ppcom_topology',
+            self.initial_topology_callback,
+            10
+        )
+        
+        # Spin until we get the first topology message
+        while self.ppcom_topo is None and rclpy.ok():
+            rclpy.spin_once(self, timeout_sec=0.1)
+        
+        # Destroy the temporary subscription
+        self.destroy_subscription(temp_sub)
 
-        msg_class = getattr(import_module(package + '.msg'), message)
+    def initial_topology_callback(self, msg):
+        """Handle the first topology message"""
+        if self.ppcom_topo is None:
+            self.ppcom_topo = PPComAccess(msg)
+            self.get_logger().info(f"Initial topology received with {len(msg.node_id)} nodes")
 
-        # Request access to the dialogue dict
-        dialogue_mutex.acquire()
+    def topology_callback(self, msg):
+        """Handle topology updates"""
+        if self.ppcom_topo is not None:
+            self.ppcom_topo.update(msg)
+            # self.get_logger().debug("Topology updated")
 
-        # If topic has not been created, create it
-        if topic not in topic_to_dialogue.keys():
-            topic_to_dialogue[topic] = Dialogue(topic, rospy.Subscriber(topic, rospy.msg.AnyMsg, DataCallback), source, callerid)
-        else:
-            topic_to_dialogue[topic].addSource(source, callerid)
+    def data_callback(self, msg, source_node, topic_name):
+        """Handle data messages and relay them according to topology"""
+        if self.ppcom_topo is None:
+            self.get_logger().warn("PPCom topology not set yet")
+            return
 
-        # # If source under this topic has not been created, create it
-        # if source not in topic_to_dialogue[topic].keys():
-        #     topic_to_dialogue[topic][source] = {}
-
-        # If 'all' is set in targets just set targets to all existing node
-        if 'all' in targets[0]:
-            targets = ppcomTopo.topo.node_id
-            
-        # For each target, create one publisher to the target
-        for target in targets:
-
-            if target == source:
-                # print(f"Target {target} is in source {source}, skipping.")
-                continue
-            
-            # Permit communication from this callerid to target
-            topic_to_dialogue[topic].addPermittedEdge((callerid, target))
-
-            # Skip if this publisher has been declared
-            if target in topic_to_dialogue[topic].target_to_pub.keys():
+        adjacency = self.ppcom_topo.get_adj()
+        
+        # Relay message to all permitted targets with line of sight
+        for target_node in self.ppcom_topo.node_id:
+            # Skip if target node is the same as source node
+            if target_node == source_node:
                 continue
 
-            # Create a subscriber and publisher pair
-            topic_to_dialogue[topic].target_to_pub[target] = rospy.Publisher(topic + '/' + target, msg_class, queue_size=1)
+            try:
+                i = self.ppcom_topo.node_id.index(source_node)
+                j = self.ppcom_topo.node_id.index(target_node)
+            except ValueError:
+                continue
 
-        dialogue_mutex.release()
+            if i >= len(self.ppcom_topo.node_alive) or j >= len(self.ppcom_topo.node_alive):
+                continue
 
-        # Report success
-        return 'success lah!'
+            # Skip if either node is dead
+            if not self.ppcom_topo.node_alive[i] or not self.ppcom_topo.node_alive[j]:
+                continue
+
+            # Skip if there is no line of sight between nodes
+            if adjacency[i, j] <= 0.0:
+                continue
+            
+            # Check if edge is permitted
+            if (source_node, target_node) not in self.topic_to_dialogue[topic_name].permitted_edges:
+                continue
+            
+            # Publish the message to the target
+            if target_node in self.topic_to_dialogue[topic_name].target_to_pub:
+                self.topic_to_dialogue[topic_name].target_to_pub[target_node].publish(msg)
+
+    def create_ppcom_topic_callback(self, request, response):
+        """Handle requests to create new PPCom topics"""
+        try:
+            source = request.source
+            targets = request.targets
+            topic = request.topic_name
+            package = request.package_name
+            message = request.message_type
+
+            self.get_logger().info(f"Creating PPCom topic: {topic} from {source} to {targets}")
+
+            # Import the message type
+            try:
+                msg_module = importlib.import_module(f'{package}.msg')
+                msg_class = getattr(msg_module, message)
+            except (ImportError, AttributeError) as e:
+                self.get_logger().error(f"Failed to import message type {package}.msg.{message}: {e}")
+                response.result = f"Failed to import message type: {e}"
+                return response
+
+            # Request access to the dialogue dict
+            self.dialogue_mutex.acquire()
+
+            try:
+                # If topic has not been created, create it
+                if topic not in self.topic_to_dialogue:
+                    self.topic_to_dialogue[topic] = Dialogue(topic, source, self.get_name())
+                else:
+                    self.topic_to_dialogue[topic].add_source(source, self.get_name())
+
+                # If 'all' is set in targets, set targets to all existing nodes
+                if targets and 'all' in targets[0]:
+                    targets = self.ppcom_topo.node_id[:]
+
+                # For each target, create one publisher to the target
+                for target in targets:
+                    if target == source:
+                        continue
+                    
+                    # Permit communication from source to target
+                    self.topic_to_dialogue[topic].add_permitted_edge((source, target))
+
+                    # Skip if this publisher has already been declared
+                    if target in self.topic_to_dialogue[topic].target_to_pub:
+                        continue
+
+                    # Create publisher for this target
+                    pub = self.create_publisher(
+                        msg_class,
+                        f"{topic}/{target}",
+                        10
+                    )
+                    self.topic_to_dialogue[topic].add_target(target, pub)
+
+                # Create subscription for the main topic if not already created
+                if not hasattr(self.topic_to_dialogue[topic], 'subscription'):
+                    sub = self.create_subscription(
+                        msg_class,
+                        topic,
+                        lambda msg, src=source, tpc=topic: self.data_callback(msg, src, tpc),
+                        10
+                    )
+                    self.topic_to_dialogue[topic].subscription = sub
+
+                response.result = 'success'
+                self.get_logger().info(f"Successfully created PPCom topic: {topic}")
+
+            finally:
+                self.dialogue_mutex.release()
+
+        except Exception as e:
+            self.get_logger().error(f"Error creating PPCom topic: {e}")
+            response.result = f'failed: {str(e)}'
+
+        return response
+
+
+def main(args=None):
+    """Main function"""
+    rclpy.init(args=args)
     
-    except Exception as e:
+    ppcom_router = PPComRouter()
+    
+    try:
+        rclpy.spin(ppcom_router)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        ppcom_router.destroy_node()
+        rclpy.shutdown()
 
-        # Report failure
-        return 'fail liao! Error: ' + str(e)
-        
 
 if __name__ == '__main__':
-
-    rospy.init_node('ppcom_router', anonymous=True)
-
-    print("ppcom_router started!")
-
-    # Wait for first ppcom message to arrive to initialize the network
-    ppcomTopo = PPComAccess(rospy.wait_for_message("/ppcom_topology", PPComTopology))
-
-    # Subscribe to the ppcom topo
-    rospy.Subscriber("/ppcom_topology_doa", PPComTopology, TopologyCallback)
-    
-    # Advertise the ppcom topic creator
-    rospy.Service('create_ppcom_topic', CreatePPComTopic, CreatePPComTopicCallback)
-
-    # Go to sleep and let the callback works
-    rospy.spin()
+    main()
