@@ -26,6 +26,7 @@ install(PROGRAMS
   scripts/ppcom_sentosa_talker.py
   scripts/ppcom_changi_talker.py
   scripts/ppcom_nanyang_talker.py
+  scripts/ppcom_call.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
