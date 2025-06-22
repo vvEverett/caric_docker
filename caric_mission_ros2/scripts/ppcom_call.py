@@ -56,11 +56,13 @@ class SimpleServiceClient(Node):
             future = self.client.call_async(request)
             rclpy.spin_until_future_complete(self, future, timeout_sec=5.0)
             
-            if future.result() and future.result().result == SUCCESS_RESPONSE:
-                self.get_logger().info(f"{source_name} PPCom service setup successful")
+            if future.done() and future.result() and future.result().result == SUCCESS_RESPONSE:
+                self.get_logger().info(f"PPCom service setup successful for {source_name}")
                 return True
             else:
-                self.get_logger().error(f"{source_name} PPCom service setup failed")
+                # ### MODIFIED ### - Added more detail to error log
+                response_result = future.result().result if future.done() and future.result() else "No response/timeout"
+                self.get_logger().error(f"PPCom service setup failed for {source_name}. Response: '{response_result}'")
                 return False
                 
         except Exception as e:
@@ -73,7 +75,7 @@ class SimpleGCSClient(SimpleServiceClient):
     
     def __init__(self):
         super().__init__("gcs")
-        self.cmd_pub = self.create_publisher(String, "/task_assign", 10)
+        # ### MODIFIED ### - Removed publisher, it's not needed for a one-off task
         
     def initialize(self):
         """Initialize GCS communication"""
@@ -83,18 +85,10 @@ class SimpleGCSClient(SimpleServiceClient):
             topic_name="/task_assign"
         )
         
-        if success:
-            # Start task publish timer
-            self.create_timer(5.0, self.publish_task)
-            
+        # ### MODIFIED ### - Removed timer and task publishing logic
         return success
     
-    def publish_task(self):
-        """Publish task message"""
-        task_msg = String()
-        task_msg.data = f"task_assignment_from_gcs_at_{time.time()}"
-        self.cmd_pub.publish(task_msg)
-        self.get_logger().info("Published task assignment")
+    # ### MODIFIED ### - Removed publish_task method
 
 
 class SimpleAgentClient(SimpleServiceClient):
@@ -119,37 +113,36 @@ class SimpleAgentClient(SimpleServiceClient):
 # =============================================================================
 
 def run_client_thread(node_name: str):
-    """Run a single client in a thread"""
+    """Run a single client in a thread to call the service"""
+    client = None # Define client here to ensure it's available in finally block
     try:
-        # Create corresponding client (ROS2 already initialized)
+        # Create corresponding client
         if node_name == "gcs":
             client = SimpleGCSClient()
         else:
             client = SimpleAgentClient(node_name)
         
-        # Initialize client
+        # Initialize client (this calls the service)
         if client.initialize():
-            print(f"{node_name} started successfully")
-            # Run client
-            rclpy.spin(client)
+            print(f"Service call for node '{node_name}' SUCCEEDED.")
         else:
-            print(f"{node_name} failed to start")
+            print(f"Service call for node '{node_name}' FAILED.")
+
+        # ### MODIFIED ###
+        # We DO NOT call rclpy.spin() here because we want the thread to exit
+        # after the service call is complete.
             
-    except KeyboardInterrupt:
-        print(f"{node_name} shutting down...")
     except Exception as e:
-        print(f"Error in {node_name}: {e}")
+        print(f"An error occurred in thread for {node_name}: {e}")
     finally:
-        try:
-            if 'client' in locals():
-                client.destroy_node()
-        except:
-            pass
+        # Clean up the node after the task is done
+        if client:
+            client.destroy_node()
 
 
 def start_all_clients():
-    """Start all 6 clients"""
-    print("=== Starting all PPCom service clients ===")
+    """Start all clients to perform their task and then exit"""
+    print("=== Starting all PPCom service clients for a one-off task ===")
     print(f"Node list: {ALL_NODES}")
     print(f"Startup delay: {STARTUP_DELAY} seconds")
     print("")
@@ -161,7 +154,7 @@ def start_all_clients():
     
     # Start each node in order
     for i, node_name in enumerate(ALL_NODES):
-        print(f"[{i+1}/6] Starting {node_name}...")
+        print(f"[{i+1}/{len(ALL_NODES)}] Dispatching task for {node_name}...")
         
         # Create and start thread
         thread = threading.Thread(
@@ -177,20 +170,19 @@ def start_all_clients():
         if i < len(ALL_NODES) - 1:
             time.sleep(STARTUP_DELAY)
     
-    print(f"\nAll {len(ALL_NODES)} clients started!")
-    print("Press Ctrl+C to stop all clients...")
+    print("\nAll client tasks dispatched. Waiting for completion...")
     
     try:
-        # Wait for all threads
+        # Wait for all threads to complete their service call
         for thread in threads:
-            thread.join()
+            thread.join() # This will now work because threads will terminate
     except KeyboardInterrupt:
-        print("\n=== Shutting down all clients ===")
+        print("\n=== Interrupted by user. Shutting down. ===")
     finally:
         # Shutdown ROS2
         rclpy.shutdown()
     
-    print("All clients stopped")
+    print("\nAll client tasks are complete. Program exiting.")
 
 
 # =============================================================================
@@ -198,11 +190,11 @@ def start_all_clients():
 # =============================================================================
 
 def main():
-    """Main function - directly start all 6 clients"""
+    """Main function"""
     try:
         start_all_clients()
     except Exception as e:
-        print(f"Startup failed: {e}")
+        print(f"A critical error occurred during startup: {e}")
 
 
 if __name__ == '__main__':

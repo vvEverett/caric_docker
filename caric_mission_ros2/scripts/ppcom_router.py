@@ -14,6 +14,12 @@ from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
 from rotors_comm_msgs.msg import PPComTopology
 from caric_mission.srv import CreatePPComTopic
 
+# Team leader definitions
+TEAM_LEADERS = {
+    '0': 'jurong',
+    '1': 'raffles'
+}
+
 
 class PPComAccess:
     """Class to handle PPCom topology access and line-of-sight calculations"""
@@ -69,9 +75,8 @@ class PPComAccess:
 class Dialogue:
     """Class to manage communication dialogue for a specific topic"""
     
-    def __init__(self, topic, source, node_name):
+    def __init__(self, topic):
         self.topic = topic
-        self.sources_to_node_name = {node_name: source}
         self.target_to_pub = {}
         self.permitted_edges = set()
 
@@ -79,13 +84,14 @@ class Dialogue:
         """Add a target node with its publisher"""
         self.target_to_pub[target] = pub
 
-    def add_source(self, source, node_name):
-        """Add a source node mapping"""
-        self.sources_to_node_name[node_name] = source
-
     def add_permitted_edge(self, edge):
         """Add a permitted communication edge"""
         self.permitted_edges.add(edge)
+    
+    @staticmethod
+    def get_leader_for_team(team_id):
+        """Get the leader name for a team_id"""
+        return TEAM_LEADERS.get(team_id, team_id)
 
 
 class PPComRouter(Node):
@@ -154,12 +160,55 @@ class PPComRouter(Node):
         """Handle topology updates"""
         if self.ppcom_topo is not None:
             self.ppcom_topo.update(msg)
-            # self.get_logger().debug("Topology updated")
 
-    def data_callback(self, msg, source_node, topic_name):
+    def parse_message_sender(self, msg_data, topic_name):
+        """
+        Parse message content to extract sender information
+        Returns the actual sender node name
+        """
+        try:
+            # Convert message data to string if needed
+            if hasattr(msg_data, 'data'):
+                content = msg_data.data
+            else:
+                content = str(msg_data)
+            
+            # Split the message by semicolon
+            parts = content.split(';')
+            if len(parts) < 2:
+                self.get_logger().warn(f"Invalid message format: {content}")
+                return None
+            
+            message_type = parts[0]
+            identifier = parts[1]
+            # Remove leading '/' if present
+            if identifier.startswith('/'):
+                identifier = identifier[1:]
+            
+            # Check if this is a team-based message (map, flyin, state_set)
+            if message_type in ['map', 'flyin', 'state_set']:
+                # identifier is team_id, need to get the leader
+                team_id = identifier
+                leader_name = Dialogue.get_leader_for_team(team_id)
+                return leader_name
+            else:
+                # identifier is the node name directly
+                return identifier
+                
+        except Exception as e:
+            self.get_logger().error(f"Error parsing message sender: {e}")
+            return None
+
+    def data_callback(self, msg, topic_name):
         """Handle data messages and relay them according to topology"""
         if self.ppcom_topo is None:
             self.get_logger().warn("PPCom topology not set yet")
+            return
+
+        # Parse the message to get the actual sender
+        source_node = self.parse_message_sender(msg, topic_name)
+        if source_node is None:
+            self.get_logger().warn("Could not determine message sender")
             return
 
         adjacency = self.ppcom_topo.get_adj()
@@ -221,9 +270,7 @@ class PPComRouter(Node):
             try:
                 # If topic has not been created, create it
                 if topic not in self.topic_to_dialogue:
-                    self.topic_to_dialogue[topic] = Dialogue(topic, source, self.get_name())
-                else:
-                    self.topic_to_dialogue[topic].add_source(source, self.get_name())
+                    self.topic_to_dialogue[topic] = Dialogue(topic)
 
                 # If 'all' is set in targets, set targets to all existing nodes
                 if targets and 'all' in targets[0]:
@@ -254,7 +301,7 @@ class PPComRouter(Node):
                     sub = self.create_subscription(
                         msg_class,
                         topic,
-                        lambda msg, src=source, tpc=topic: self.data_callback(msg, src, tpc),
+                        lambda msg, tpc=topic: self.data_callback(msg, tpc),
                         10
                     )
                     self.topic_to_dialogue[topic].subscription = sub

@@ -60,7 +60,9 @@ class JurongTalker(Node):
 
     def ping_message_callback(self, msg):
         """Handle received ping messages"""
-        self.get_logger().info(f"Received: {msg.data}")
+        BLUE = '\033[94m'
+        RESET = '\033[0m'
+        self.get_logger().info(f"{BLUE}*** RECEIVED ***{RESET}: {msg.data}")
 
     def timer_callback(self):
         """Timer callback for periodic message publishing"""
@@ -71,9 +73,11 @@ class JurongTalker(Node):
         
         # Create and publish message
         msg = String()
-        msg.data = f"{self.get_name()} says hello at time {self.get_clock().now().to_msg().sec}.{self.get_clock().now().to_msg().nanosec}. Random Text: {result_str}!"
+        msg.data = f"test;/jurong;{result_str}"
         
-        self.get_logger().info(f"SENDING: {msg.data}")
+        GREEN = '\033[92m'
+        RESET = '\033[0m'
+        self.get_logger().info(f"{GREEN}*** SENDING ***{RESET}: {msg.data}")
         self.msg_pub.publish(msg)
 
 
