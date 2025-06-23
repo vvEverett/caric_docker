@@ -27,6 +27,8 @@ install(PROGRAMS
   scripts/ppcom_changi_talker.py
   scripts/ppcom_nanyang_talker.py
   scripts/ppcom_call.py
+  scripts/ppcom_call_new.py
+  scripts/ppcom_router_new.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
