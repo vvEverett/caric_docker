@@ -1,6 +1,6 @@
 name: my_domain_bridge
 from_domain: 0
-to_domain: 3
+to_domain: 4
 
 topics:
   # Bridge "/foo/chatter" topic from doman ID 2 to domain ID 3
@@ -21,106 +21,106 @@ topics:
   /changi/slf_kf_cloud:
     type: sensor_msgs/msg/PointCloud2
 
-  /domain3/gcs/bounding_box_vertices:
+  /domain4/gcs/bounding_box_vertices:
     type: sensor_msgs/msg/PointCloud
     remap: gcs/bounding_box_vertices
 
-  /domain3/jurong/cloud_inW:
+  /domain4/jurong/cloud_inW:
     type: sensor_msgs/msg/PointCloud2
     remap: jurong/cloud_inW
-  /domain3/jurong/detected_interest_points:
+  /domain4/jurong/detected_interest_points:
     type: sensor_msgs/msg/PointCloud2
     remap: jurong/detected_interest_points
-  /domain3/jurong/gimbal:
+  /domain4/jurong/gimbal:
     type: geometry_msgs/msg/TwistStamped
     remap: jurong/gimbal
-  /domain3/jurong/ground_truth/odometry:
+  /domain4/jurong/ground_truth/odometry:
     type: nav_msgs/msg/Odometry
     remap: jurong/ground_truth/odometry
-  /domain3/jurong/nbr_kf_cloud:
+  /domain4/jurong/nbr_kf_cloud:
     type: sensor_msgs/msg/PointCloud2
     remap: jurong/nbr_kf_cloud
-  /domain3/jurong/nbr_odom_cloud:
+  /domain4/jurong/nbr_odom_cloud:
     type: sensor_msgs/msg/PointCloud2
     remap: jurong/nbr_odom_cloud
-  /domain3/jurong/slf_kf_cloud:
+  /domain4/jurong/slf_kf_cloud:
     type: sensor_msgs/msg/PointCloud2
     remap: jurong/slf_kf_cloud
 
-  /domain3/nanyang/cloud_inW:
+  /domain4/nanyang/cloud_inW:
     type: sensor_msgs/msg/PointCloud2
     remap: nanyang/cloud_inW
-  /domain3/nanyang/detected_interest_points:
+  /domain4/nanyang/detected_interest_points:
     type: sensor_msgs/msg/PointCloud2
     remap: nanyang/detected_interest_points
-  /domain3/nanyang/gimbal:
+  /domain4/nanyang/gimbal:
     type: geometry_msgs/msg/TwistStamped
     remap: nanyang/gimbal
-  /domain3/nanyang/ground_truth/odometry:
+  /domain4/nanyang/ground_truth/odometry:
     type: nav_msgs/msg/Odometry
     remap: nanyang/ground_truth/odometry
-  /domain3/nanyang/nbr_kf_cloud:
+  /domain4/nanyang/nbr_kf_cloud:
     type: sensor_msgs/msg/PointCloud2
     remap: nanyang/nbr_kf_cloud
-  /domain3/nanyang/nbr_odom_cloud:
+  /domain4/nanyang/nbr_odom_cloud:
     type: sensor_msgs/msg/PointCloud2
     remap: nanyang/nbr_odom_cloud
-  /domain3/nanyang/slf_kf_cloud:
+  /domain4/nanyang/slf_kf_cloud:
     type: sensor_msgs/msg/PointCloud2
     remap: nanyang/slf_kf_cloud
 
-  /domain3/raffles/cloud_inW:
+  /domain4/raffles/cloud_inW:
     type: sensor_msgs/msg/PointCloud2
     remap: raffles/cloud_inW
-  /domain3/raffles/detected_interest_points:
+  /domain4/raffles/detected_interest_points:
     type: sensor_msgs/msg/PointCloud2
     remap: raffles/detected_interest_points
-  /domain3/raffles/gimbal:
+  /domain4/raffles/gimbal:
     type: geometry_msgs/msg/TwistStamped
     remap: raffles/gimbal
-  /domain3/raffles/ground_truth/odometry:
+  /domain4/raffles/ground_truth/odometry:
     type: nav_msgs/msg/Odometry
     remap: raffles/ground_truth/odometry
-  /domain3/raffles/nbr_kf_cloud:
+  /domain4/raffles/nbr_kf_cloud:
     type: sensor_msgs/msg/PointCloud2
     remap: raffles/nbr_kf_cloud
-  /domain3/raffles/nbr_odom_cloud:
+  /domain4/raffles/nbr_odom_cloud:
     type: sensor_msgs/msg/PointCloud2
     remap: raffles/nbr_odom_cloud
-  /domain3/raffles/slf_kf_cloud:
+  /domain4/raffles/slf_kf_cloud:
     type: sensor_msgs/msg/PointCloud2
     remap: raffles/slf_kf_cloud
 
-  /domain3/sentosa/cloud_inW:
+  /domain4/sentosa/cloud_inW:
     type: sensor_msgs/msg/PointCloud2
     remap: sentosa/cloud_inW
-  /domain3/sentosa/detected_interest_points:
+  /domain4/sentosa/detected_interest_points:
     type: sensor_msgs/msg/PointCloud2
     remap: sentosa/detected_interest_points
-  /domain3/sentosa/gimbal:
+  /domain4/sentosa/gimbal:
     type: geometry_msgs/msg/TwistStamped
     remap: sentosa/gimbal
-  /domain3/sentosa/ground_truth/odometry:
+  /domain4/sentosa/ground_truth/odometry:
     type: nav_msgs/msg/Odometry
     remap: sentosa/ground_truth/odometry
-  /domain3/sentosa/nbr_kf_cloud:
+  /domain4/sentosa/nbr_kf_cloud:
     type: sensor_msgs/msg/PointCloud2
     remap: sentosa/nbr_kf_cloud
-  /domain3/sentosa/nbr_odom_cloud:
+  /domain4/sentosa/nbr_odom_cloud:
     type: sensor_msgs/msg/PointCloud2
     remap: sentosa/nbr_odom_cloud
-  /domain3/sentosa/slf_kf_cloud:
+  /domain4/sentosa/slf_kf_cloud:
     type: sensor_msgs/msg/PointCloud2
     remap: sentosa/slf_kf_cloud
 
   # Command
   /changi/command/gimbal:
     type: geometry_msgs/msg/Twist
-    from_domain: 3
+    from_domain: 4
     to_domain: 0
   /changi/command/trajectory:
     type: trajectory_msgs/msg/MultiDOFJointTrajectory
-    from_domain: 3
+    from_domain: 4
     to_domain: 0
 
   # Bridge "/clock" topic from doman ID 2 to domain ID 3,
