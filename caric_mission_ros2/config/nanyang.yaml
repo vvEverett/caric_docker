@@ -1,126 +1,126 @@
 name: my_domain_bridge
 from_domain: 0
-to_domain: 2
+to_domain: 5
 
 topics:
   # Bridge "/foo/chatter" topic from doman ID 2 to domain ID 3
   # Automatically detect QoS settings and default to 'keep_last' history with depth 1
 
-  /raffles/cloud_inW:
+  /nanyang/cloud_inW:
     type: sensor_msgs/msg/PointCloud2
-  /raffles/detected_interest_points:
+  /nanyang/detected_interest_points:
     type: sensor_msgs/msg/PointCloud2
-  /raffles/gimbal:
+  /nanyang/gimbal:
     type: geometry_msgs/msg/TwistStamped
-  /raffles/ground_truth/odometry:
+  /nanyang/ground_truth/odometry:
     type: nav_msgs/msg/Odometry
-  /raffles/nbr_kf_cloud:
+  /nanyang/nbr_kf_cloud:
     type: sensor_msgs/msg/PointCloud2
-  /raffles/nbr_odom_cloud:
+  /nanyang/nbr_odom_cloud:
     type: sensor_msgs/msg/PointCloud2
-  /raffles/slf_kf_cloud:
+  /nanyang/slf_kf_cloud:
     type: sensor_msgs/msg/PointCloud2
 
-  /domain2/gcs/bounding_box_vertices:
+  /domain5/gcs/bounding_box_vertices:
     type: sensor_msgs/msg/PointCloud
     remap: gcs/bounding_box_vertices
 
-  /domain2/changi/cloud_inW:
-    type: sensor_msgs/msg/PointCloud2
-    remap: changi/cloud_inW
-  /domain2/changi/detected_interest_points:
-    type: sensor_msgs/msg/PointCloud2
-    remap: changi/detected_interest_points
-  /domain2/changi/gimbal:
-    type: geometry_msgs/msg/TwistStamped
-    remap: changi/gimbal
-  /domain2/changi/ground_truth/odometry:
-    type: nav_msgs/msg/Odometry
-    remap: changi/ground_truth/odometry
-  /domain2/changi/nbr_kf_cloud:
-    type: sensor_msgs/msg/PointCloud2
-    remap: changi/nbr_kf_cloud
-  /domain2/changi/nbr_odom_cloud:
-    type: sensor_msgs/msg/PointCloud2
-    remap: changi/nbr_odom_cloud
-  /domain2/changi/slf_kf_cloud:
-    type: sensor_msgs/msg/PointCloud2
-    remap: changi/slf_kf_cloud
-
-  /domain2/nanyang/cloud_inW:
-    type: sensor_msgs/msg/PointCloud2
-    remap: nanyang/cloud_inW
-  /domain2/nanyang/detected_interest_points:
-    type: sensor_msgs/msg/PointCloud2
-    remap: nanyang/detected_interest_points
-  /domain2/nanyang/gimbal:
-    type: geometry_msgs/msg/TwistStamped
-    remap: nanyang/gimbal
-  /domain2/nanyang/ground_truth/odometry:
-    type: nav_msgs/msg/Odometry
-    remap: nanyang/ground_truth/odometry
-  /domain2/nanyang/nbr_kf_cloud:
-    type: sensor_msgs/msg/PointCloud2
-    remap: nanyang/nbr_kf_cloud
-  /domain2/nanyang/nbr_odom_cloud:
-    type: sensor_msgs/msg/PointCloud2
-    remap: nanyang/nbr_odom_cloud
-  /domain2/nanyang/slf_kf_cloud:
-    type: sensor_msgs/msg/PointCloud2
-    remap: nanyang/slf_kf_cloud
-
-  /domain2/jurong/cloud_inW:
+  /domain5/jurong/cloud_inW:
     type: sensor_msgs/msg/PointCloud2
     remap: jurong/cloud_inW
-  /domain2/jurong/detected_interest_points:
+  /domain5/jurong/detected_interest_points:
     type: sensor_msgs/msg/PointCloud2
     remap: jurong/detected_interest_points
-  /domain2/jurong/gimbal:
+  /domain5/jurong/gimbal:
     type: geometry_msgs/msg/TwistStamped
     remap: jurong/gimbal
-  /domain2/jurong/ground_truth/odometry:
+  /domain5/jurong/ground_truth/odometry:
     type: nav_msgs/msg/Odometry
     remap: jurong/ground_truth/odometry
-  /domain2/jurong/nbr_kf_cloud:
+  /domain5/jurong/nbr_kf_cloud:
     type: sensor_msgs/msg/PointCloud2
     remap: jurong/nbr_kf_cloud
-  /domain2/jurong/nbr_odom_cloud:
+  /domain5/jurong/nbr_odom_cloud:
     type: sensor_msgs/msg/PointCloud2
     remap: jurong/nbr_odom_cloud
-  /domain2/jurong/slf_kf_cloud:
+  /domain5/jurong/slf_kf_cloud:
     type: sensor_msgs/msg/PointCloud2
     remap: jurong/slf_kf_cloud
 
-  /domain2/sentosa/cloud_inW:
+  /domain5/nanyang/cloud_inW:
+    type: sensor_msgs/msg/PointCloud2
+    remap: nanyang/cloud_inW
+  /domain5/nanyang/detected_interest_points:
+    type: sensor_msgs/msg/PointCloud2
+    remap: nanyang/detected_interest_points
+  /domain5/nanyang/gimbal:
+    type: geometry_msgs/msg/TwistStamped
+    remap: nanyang/gimbal
+  /domain5/nanyang/ground_truth/odometry:
+    type: nav_msgs/msg/Odometry
+    remap: nanyang/ground_truth/odometry
+  /domain5/nanyang/nbr_kf_cloud:
+    type: sensor_msgs/msg/PointCloud2
+    remap: nanyang/nbr_kf_cloud
+  /domain5/nanyang/nbr_odom_cloud:
+    type: sensor_msgs/msg/PointCloud2
+    remap: nanyang/nbr_odom_cloud
+  /domain5/nanyang/slf_kf_cloud:
+    type: sensor_msgs/msg/PointCloud2
+    remap: nanyang/slf_kf_cloud
+
+  /domain5/raffles/cloud_inW:
+    type: sensor_msgs/msg/PointCloud2
+    remap: raffles/cloud_inW
+  /domain5/raffles/detected_interest_points:
+    type: sensor_msgs/msg/PointCloud2
+    remap: raffles/detected_interest_points
+  /domain5/raffles/gimbal:
+    type: geometry_msgs/msg/TwistStamped
+    remap: raffles/gimbal
+  /domain5/raffles/ground_truth/odometry:
+    type: nav_msgs/msg/Odometry
+    remap: raffles/ground_truth/odometry
+  /domain5/raffles/nbr_kf_cloud:
+    type: sensor_msgs/msg/PointCloud2
+    remap: raffles/nbr_kf_cloud
+  /domain5/raffles/nbr_odom_cloud:
+    type: sensor_msgs/msg/PointCloud2
+    remap: raffles/nbr_odom_cloud
+  /domain5/raffles/slf_kf_cloud:
+    type: sensor_msgs/msg/PointCloud2
+    remap: raffles/slf_kf_cloud
+
+  /domain5/sentosa/cloud_inW:
     type: sensor_msgs/msg/PointCloud2
     remap: sentosa/cloud_inW
-  /domain2/sentosa/detected_interest_points:
+  /domain5/sentosa/detected_interest_points:
     type: sensor_msgs/msg/PointCloud2
     remap: sentosa/detected_interest_points
-  /domain2/sentosa/gimbal:
+  /domain5/sentosa/gimbal:
     type: geometry_msgs/msg/TwistStamped
     remap: sentosa/gimbal
-  /domain2/sentosa/ground_truth/odometry:
+  /domain5/sentosa/ground_truth/odometry:
     type: nav_msgs/msg/Odometry
     remap: sentosa/ground_truth/odometry
-  /domain2/sentosa/nbr_kf_cloud:
+  /domain5/sentosa/nbr_kf_cloud:
     type: sensor_msgs/msg/PointCloud2
     remap: sentosa/nbr_kf_cloud
-  /domain2/sentosa/nbr_odom_cloud:
+  /domain5/sentosa/nbr_odom_cloud:
     type: sensor_msgs/msg/PointCloud2
     remap: sentosa/nbr_odom_cloud
-  /domain2/sentosa/slf_kf_cloud:
+  /domain5/sentosa/slf_kf_cloud:
     type: sensor_msgs/msg/PointCloud2
     remap: sentosa/slf_kf_cloud
 
   # Command
-  /raffles/command/gimbal:
+  /changi/command/gimbal:
     type: geometry_msgs/msg/Twist
-    from_domain: 2
+    from_domain: 5
     to_domain: 0
-  /raffles/command/trajectory:
+  /changi/command/trajectory:
     type: trajectory_msgs/msg/MultiDOFJointTrajectory
-    from_domain: 2
+    from_domain: 5
     to_domain: 0
 
   # Bridge "/clock" topic from doman ID 2 to domain ID 3,
