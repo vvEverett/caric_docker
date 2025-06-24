@@ -20,8 +20,8 @@ TARGET_TO_DOMAIN = {
     'gcs': 0,
     'jurong': 1,
     'raffles': 2,
-    'sentosa': 3,
-    'changi': 4,
+    'changi': 3,
+    'sentosa': 4,
     'nanyang': 5,
     # Add more mappings as needed
 }
