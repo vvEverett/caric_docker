@@ -69,27 +69,27 @@ topics:
     type: sensor_msgs/msg/PointCloud2
     remap: nanyang/slf_kf_cloud
 
-  /domain2/raffles/cloud_inW:
+  /domain2/jurong/cloud_inW:
     type: sensor_msgs/msg/PointCloud2
-    remap: raffles/cloud_inW
-  /domain2/raffles/detected_interest_points:
+    remap: jurong/cloud_inW
+  /domain2/jurong/detected_interest_points:
     type: sensor_msgs/msg/PointCloud2
-    remap: raffles/detected_interest_points
-  /domain2/raffles/gimbal:
+    remap: jurong/detected_interest_points
+  /domain2/jurong/gimbal:
     type: geometry_msgs/msg/TwistStamped
-    remap: raffles/gimbal
-  /domain2/raffles/ground_truth/odometry:
+    remap: jurong/gimbal
+  /domain2/jurong/ground_truth/odometry:
     type: nav_msgs/msg/Odometry
-    remap: raffles/ground_truth/odometry
-  /domain2/raffles/nbr_kf_cloud:
+    remap: jurong/ground_truth/odometry
+  /domain2/jurong/nbr_kf_cloud:
     type: sensor_msgs/msg/PointCloud2
-    remap: raffles/nbr_kf_cloud
-  /domain2/raffles/nbr_odom_cloud:
+    remap: jurong/nbr_kf_cloud
+  /domain2/jurong/nbr_odom_cloud:
     type: sensor_msgs/msg/PointCloud2
-    remap: raffles/nbr_odom_cloud
-  /domain2/raffles/slf_kf_cloud:
+    remap: jurong/nbr_odom_cloud
+  /domain2/jurong/slf_kf_cloud:
     type: sensor_msgs/msg/PointCloud2
-    remap: raffles/slf_kf_cloud
+    remap: jurong/slf_kf_cloud
 
   /domain2/sentosa/cloud_inW:
     type: sensor_msgs/msg/PointCloud2
