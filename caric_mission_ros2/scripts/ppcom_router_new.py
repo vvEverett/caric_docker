@@ -15,6 +15,17 @@ from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
 from rotors_comm_msgs.msg import PPComTopology
 from caric_mission.srv import CreatePPComTopic
 
+# Target to domain mapping - define your mapping here
+TARGET_TO_DOMAIN = {
+    'gcs': 0,
+    'jurong': 1,
+    'raffles': 2,
+    'sentosa': 3,
+    'changi': 4,
+    'nanyang': 5,
+    # Add more mappings as needed
+}
+
 
 class PPComAccess:
     """Class to handle PPCom topology access and line-of-sight calculations"""
@@ -250,10 +261,13 @@ class PPComRouter(Node):
                     if target in self.topic_to_dialogue[topic].target_to_pub:
                         continue
 
-                    # Create publisher for this target
+                    # Get domain number for target
+                    domain_num = TARGET_TO_DOMAIN.get(target, 0)  # Default to 0 if target not found
+                    
+                    # Create publisher for this target with domain format
                     pub = self.create_publisher(
                         msg_class,
-                        f"{topic}/{target}",
+                        f"/domain{domain_num}{topic}",
                         10
                     )
                     self.topic_to_dialogue[topic].add_target(target, pub)
