@@ -11,7 +11,7 @@ ros2 launch caric_mission_ros2 multi_bridge.launch.py
 This will start:
 - Jurong bridge: Domain 0 <-> Domain 1  
 - Raffles bridge: Domain 0 <-> Domain 2
-- Changi bridge: Domain 0 <-> Domain 3
+- Changi bridge: Domain 0 <-> Domain 4
 """
 
 import os
@@ -49,29 +49,14 @@ def generate_launch_description():
     enable_changi_bridge_arg = DeclareLaunchArgument(
         'enable_changi_bridge',
         default_value='true',
-        description='Enable changi bridge (domain 0 <-> domain 3)'
+        description='Enable changi bridge (domain 0 <-> domain 4)'
     )
 
     # Get launch configuration values
     package_name = LaunchConfiguration('package_name')
-    enable_raffles_bridge = LaunchConfiguration('enable_raffles_bridge')
     enable_jurong_bridge = LaunchConfiguration('enable_jurong_bridge')
+    enable_raffles_bridge = LaunchConfiguration('enable_raffles_bridge')
     enable_changi_bridge = LaunchConfiguration('enable_changi_bridge')
-
-    # Raffles Bridge: Domain 0 <-> Domain 2
-    raffles_bridge = Node(
-        package='domain_bridge',
-        executable='domain_bridge',
-        name='raffles_domain_bridge',
-        arguments=[
-            PathJoinSubstitution([
-                FindPackageShare(package_name),
-                'config',
-                'raffles.yaml'
-            ])
-        ],
-        condition=IfCondition(enable_raffles_bridge)
-    )
 
     # Jurong Bridge: Domain 0 <-> Domain 1
     jurong_bridge = Node(
@@ -88,7 +73,22 @@ def generate_launch_description():
         condition=IfCondition(enable_jurong_bridge)
     )
 
-    # Changi Bridge: Domain 0 <-> Domain 3
+    # Raffles Bridge: Domain 0 <-> Domain 2
+    raffles_bridge = Node(
+        package='domain_bridge',
+        executable='domain_bridge',
+        name='raffles_domain_bridge',
+        arguments=[
+            PathJoinSubstitution([
+                FindPackageShare(package_name),
+                'config',
+                'raffles.yaml'
+            ])
+        ],
+        condition=IfCondition(enable_raffles_bridge)
+    )
+
+    # Changi Bridge: Domain 0 <-> Domain 4
     changi_bridge = Node(
         package='domain_bridge',
         executable='domain_bridge',
