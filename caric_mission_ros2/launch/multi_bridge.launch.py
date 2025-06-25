@@ -2,13 +2,14 @@
 """
 Multi-Domain Bridge Launch File
 
-Launch multiple domain bridges simultaneously for raffles, jurong, sentosa, changi and nanyang configurations.
+Launch multiple domain bridges simultaneously for gcs, raffles, jurong, sentosa, changi and nanyang configurations.
 Each bridge instance runs independently and bridges different domain pairs.
 
 Usage:
 ros2 launch caric_mission_ros2 multi_bridge.launch.py
 
 This will start:
+- GCS bridge: Domain 0 <-> Domain 99
 - Jurong bridge: Domain 0 <-> Domain 1  
 - Raffles bridge: Domain 0 <-> Domain 2
 - Sentosa bridge: Domain 0 <-> Domain 3
@@ -34,7 +35,11 @@ def generate_launch_description():
         default_value='caric_mission_ros2',
         description='Name of the package containing the config files'
     )
-    
+    enable_gcs_bridge_arg = DeclareLaunchArgument(
+        'enable_gcs_bridge',
+        default_value='true',
+        description='Enable gcs bridge (domain 0 <-> domain 99)'
+    )
     enable_jurong_bridge_arg = DeclareLaunchArgument(
         'enable_jurong_bridge', 
         default_value='true',
@@ -63,11 +68,28 @@ def generate_launch_description():
     
     # Get launch configuration values
     package_name = LaunchConfiguration('package_name')
+    enable_gcs_bridge = LaunchConfiguration('enable_gcs_bridge')
     enable_jurong_bridge = LaunchConfiguration('enable_jurong_bridge')
     enable_raffles_bridge = LaunchConfiguration('enable_raffles_bridge')
     enable_changi_bridge = LaunchConfiguration('enable_changi_bridge')
     enable_sentosa_bridge = LaunchConfiguration('enable_sentosa_bridge')
     enable_nanyang_bridge = LaunchConfiguration('enable_nanyang_bridge')
+
+
+    # gcs Bridge: Domain 0 <-> Domain 99
+    gcs_bridge = Node(
+        package='domain_bridge',
+        executable='domain_bridge',
+        name='gcs_domain_bridge',
+        arguments=[
+            PathJoinSubstitution([
+                FindPackageShare(package_name),
+                'config',
+                'gcs.yaml'
+            ])
+        ],
+        condition=IfCondition(enable_gcs_bridge)
+    )
 
     # Jurong Bridge: Domain 0 <-> Domain 1
     jurong_bridge = Node(
@@ -142,6 +164,7 @@ def generate_launch_description():
     )
     # Group all bridges for better organization
     bridge_group = GroupAction([
+        gcs_bridge,
         raffles_bridge,
         jurong_bridge,
         changi_bridge,
@@ -152,11 +175,13 @@ def generate_launch_description():
     return LaunchDescription([
         # Launch arguments
         package_name_arg,
+        enable_gcs_bridge_arg,
         enable_raffles_bridge_arg,
         enable_jurong_bridge_arg,
         enable_changi_bridge_arg,
         enable_sentosa_bridge_arg,
         enable_nanyang_bridge_arg,
+
 
         # All bridges
         bridge_group,
