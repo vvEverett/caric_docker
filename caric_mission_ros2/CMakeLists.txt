@@ -29,7 +29,8 @@ install(PROGRAMS
   scripts/ppcom_call.py
   scripts/ppcom_call_new.py
   scripts/ppcom_router_new.py
-  DESTINATION lib/${PROJECT_NAME}
+  scripts/ppcom_sequential_launcher.py
+  DESTINATION share/${PROJECT_NAME}/scripts
 )
 
 # Install Launch files
