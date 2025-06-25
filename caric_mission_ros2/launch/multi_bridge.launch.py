@@ -2,7 +2,7 @@
 """
 Multi-Domain Bridge Launch File
 
-Launch multiple domain bridges simultaneously for raffles, jurong, and changi configurations.
+Launch multiple domain bridges simultaneously for raffles, jurong, sentosa, changi and nanyang configurations.
 Each bridge instance runs independently and bridges different domain pairs.
 
 Usage:
@@ -11,7 +11,9 @@ ros2 launch caric_mission_ros2 multi_bridge.launch.py
 This will start:
 - Jurong bridge: Domain 0 <-> Domain 1  
 - Raffles bridge: Domain 0 <-> Domain 2
+- Sentosa bridge: Domain 0 <-> Domain 3
 - Changi bridge: Domain 0 <-> Domain 4
+- Nanyang bridge: Domain 0 <-> Domain 5
 """
 
 import os
