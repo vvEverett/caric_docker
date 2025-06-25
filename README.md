@@ -47,6 +47,7 @@ docker compose up
 ```
 After building the ros package, do not close the terminal; open a new terminal. Run the following command to enter the container:
 
+
 ```bash
 xhost + #allowing allow docker access to screen
 docker exec -it ros_caric_container_1 bash # open a container terminal
