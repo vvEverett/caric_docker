@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import sys
 import random
 import string
@@ -10,12 +9,19 @@ from std_msgs.msg import String
 from rotors_comm_msgs.msg import PPComTopology
 from caric_mission.srv import CreatePPComTopic
 
-
 class NanyangTalker(Node):
     """Nanyang node talker for PPCom communication"""
 
     def __init__(self):
         super().__init__('nanyang_talker')
+        
+        # Initialize flags for tracking received messages
+        self.received_flags = {
+            'jurong': 0,
+            'raffles': 0,
+            'sentosa': 0,
+            'changi': 0
+        }
         
         # Wait for service to be available
         self.create_topic_client = self.create_client(CreatePPComTopic, 'create_ppcom_topic')
@@ -82,10 +88,9 @@ class NanyangTalker(Node):
             self.get_logger().error("Failed to register topic")
 
     def ping_message_callback(self, msg, source):
-        """Handle received ping messages"""
-        BLUE = '\033[94m'
-        RESET = '\033[0m'
-        self.get_logger().info(f"{BLUE}*** RECEIVED from {source} ***{RESET}: {msg.data}")
+        """Handle received ping messages and set corresponding flag"""
+        if source in self.received_flags:
+            self.received_flags[source] = 1
 
     def timer_callback(self):
         """Timer callback for periodic message publishing"""
@@ -98,11 +103,35 @@ class NanyangTalker(Node):
         msg = String()
         msg.data = f"test;/nanyang;{result_str}"
         
+        # Color codes
+        BLUE = '\033[94m'
         GREEN = '\033[92m'
+        RED = '\033[91m'
         RESET = '\033[0m'
-        self.get_logger().info(f"{GREEN}*** SENDING ***{RESET}: {msg.data}")
+        
+        # Display sending status
+        self.get_logger().info(f"{GREEN}*  SENDING  *{RESET}")
         self.msg_pub.publish(msg)
-
+        
+        # Check flags and build received status display
+        received_nodes = []
+        not_received_nodes = []
+        
+        for node_name, flag in self.received_flags.items():
+            if flag == 1:
+                received_nodes.append(f"{GREEN}'{node_name}'{RESET}")
+            else:
+                not_received_nodes.append(f"{RED}'{node_name}'{RESET}")
+        
+        # Combine all nodes for display
+        all_nodes = received_nodes + not_received_nodes
+        if all_nodes:
+            nodes_str = ', '.join(all_nodes)
+            self.get_logger().info(f"Received: {nodes_str}")
+        
+        # Reset all flags to 0
+        for node_name in self.received_flags:
+            self.received_flags[node_name] = 0
 
 def main(args=None):
     """Main function"""
@@ -117,7 +146,6 @@ def main(args=None):
     finally:
         nanyang_talker.destroy_node()
         rclpy.shutdown()
-
 
 if __name__ == '__main__':
     main()
