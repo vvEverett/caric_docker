@@ -77,6 +77,7 @@ In the new docker ros_caric_drone (ROS_DOMAIN_ID=1), you should be able to get t
 docker exec -it ros_caric_drone bash
 ros2 topic echo /sentosa/gimbal
 ```
+updating...
 
 The file `domain_bridge.yaml` governs the topics to be transferred across domains in ROS2.
 
