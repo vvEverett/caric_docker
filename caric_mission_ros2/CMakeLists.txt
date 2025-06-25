@@ -15,6 +15,7 @@ find_package(nav_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(rotors_comm_msgs REQUIRED)
 find_package(caric_mission REQUIRED)
+find_package(domain_bridge REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
 
@@ -27,10 +28,8 @@ install(PROGRAMS
   scripts/ppcom_changi_talker.py
   scripts/ppcom_nanyang_talker.py
   scripts/ppcom_call.py
-  scripts/ppcom_call_new.py
-  scripts/ppcom_router_new.py
   scripts/ppcom_sequential_launcher.py
-  DESTINATION share/${PROJECT_NAME}/scripts
+  DESTINATION lib/${PROJECT_NAME}
 )
 
 # Install Launch files

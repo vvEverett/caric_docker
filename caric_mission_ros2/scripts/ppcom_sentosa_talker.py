@@ -27,12 +27,35 @@ class SentosaTalker(Node):
         # Register the topic with ppcom router
         self.register_topic()
         
-        # Create publisher and subscriber
-        self.msg_pub = self.create_publisher(String, '/ping_message', 10)
-        self.ping_sub = self.create_subscription(
+        # Create publisher
+        self.msg_pub = self.create_publisher(String, '/sentosa/ping_message', 10)
+        
+        # Create subscribers for other nodes
+        self.jurong_sub = self.create_subscription(
             String,
-            '/ping_message/sentosa',
-            self.ping_message_callback,
+            '/domain3/jurong/ping_message',
+            lambda msg: self.ping_message_callback(msg, 'jurong'),
+            10
+        )
+        
+        self.raffles_sub = self.create_subscription(
+            String,
+            '/domain3/raffles/ping_message',
+            lambda msg: self.ping_message_callback(msg, 'raffles'),
+            10
+        )
+        
+        self.changi_sub = self.create_subscription(
+            String,
+            '/domain3/changi/ping_message',
+            lambda msg: self.ping_message_callback(msg, 'changi'),
+            10
+        )
+        
+        self.nanyang_sub = self.create_subscription(
+            String,
+            '/domain3/nanyang/ping_message',
+            lambda msg: self.ping_message_callback(msg, 'nanyang'),
             10
         )
         
@@ -46,7 +69,7 @@ class SentosaTalker(Node):
         request = CreatePPComTopic.Request()
         request.source = 'sentosa'
         request.targets = ['raffles']
-        request.topic_name = '/ping_message'
+        request.topic_name = '/sentosa/ping_message'
         request.package_name = 'std_msgs'
         request.message_type = 'String'
         
@@ -58,11 +81,11 @@ class SentosaTalker(Node):
         else:
             self.get_logger().error("Failed to register topic")
 
-    def ping_message_callback(self, msg):
+    def ping_message_callback(self, msg, source):
         """Handle received ping messages"""
         BLUE = '\033[94m'
         RESET = '\033[0m'
-        self.get_logger().info(f"{BLUE}*** RECEIVED ***{RESET}: {msg.data}")
+        self.get_logger().info(f"{BLUE}*** RECEIVED from {source} ***{RESET}: {msg.data}")
 
     def timer_callback(self):
         """Timer callback for periodic message publishing"""

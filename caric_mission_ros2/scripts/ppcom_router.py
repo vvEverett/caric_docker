@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# PPCom Router for ROS2 based on baseline code, can only handle String messages
+# Router for accept original UAV messages and relay them according to the topology.
 
 import sys
 import numpy as np
@@ -15,10 +15,15 @@ from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
 from rotors_comm_msgs.msg import PPComTopology
 from caric_mission.srv import CreatePPComTopic
 
-# Team leader definitions
-TEAM_LEADERS = {
-    '0': 'jurong',
-    '1': 'raffles'
+# Target to domain mapping - define your mapping here
+TARGET_TO_DOMAIN = {
+    'gcs': 99,
+    'jurong': 1,
+    'raffles': 2,
+    'sentosa': 3,
+    'changi': 4,
+    'nanyang': 5,
+    # Add more mappings as needed
 }
 
 
@@ -88,11 +93,6 @@ class Dialogue:
     def add_permitted_edge(self, edge):
         """Add a permitted communication edge"""
         self.permitted_edges.add(edge)
-    
-    @staticmethod
-    def get_leader_for_team(team_id):
-        """Get the leader name for a team_id"""
-        return TEAM_LEADERS.get(team_id, team_id)
 
 
 class PPComRouter(Node):
@@ -162,42 +162,14 @@ class PPComRouter(Node):
         if self.ppcom_topo is not None:
             self.ppcom_topo.update(msg)
 
-    def parse_message_sender(self, msg_data, topic_name):
-        """
-        Parse message content to extract sender information
-        Returns the actual sender node name
-        """
+    def parse_message_sender(self, msg, topic_name):
         try:
-            # Convert message data to string if needed
-            if hasattr(msg_data, 'data'):
-                content = msg_data.data
-            else:
-                content = str(msg_data)
-            
-            # Split the message by semicolon
-            parts = content.split(';')
-            if len(parts) < 2:
-                self.get_logger().warn(f"Invalid message format: {content}")
-                return None
-            
-            message_type = parts[0]
-            identifier = parts[1]
-            # Remove leading '/' if present
-            if identifier.startswith('/'):
-                identifier = identifier[1:]
-            
-            # Check if this is a team-based message (map, flyin, state_set)
-            if message_type in ['map', 'flyin', 'state_set']:
-                # identifier is team_id, need to get the leader
-                team_id = identifier
-                leader_name = Dialogue.get_leader_for_team(team_id)
-                return leader_name
-            else:
-                # identifier is the node name directly
-                return identifier
-                
-        except Exception as e:
-            self.get_logger().error(f"Error parsing message sender: {e}")
+            # Assumes the structure is always /<sender>/...
+            source_node = topic_name.split('/')[1]
+            return source_node
+        except IndexError:
+            # Handle cases where the topic_name might not have the expected structure
+            print(f"Warning: Could not parse sender from topic '{topic_name}'.")
             return None
 
     def data_callback(self, msg, topic_name):
@@ -256,7 +228,7 @@ class PPComRouter(Node):
 
             self.get_logger().info(f"Creating PPCom topic: {topic} from {source} to {targets}")
 
-            # Import the message type
+            # Import the message type (Like ROS1 AnyMsg)
             try:
                 msg_module = importlib.import_module(f'{package}.msg')
                 msg_class = getattr(msg_module, message)
@@ -289,10 +261,13 @@ class PPComRouter(Node):
                     if target in self.topic_to_dialogue[topic].target_to_pub:
                         continue
 
-                    # Create publisher for this target
+                    # Get domain number for target
+                    domain_num = TARGET_TO_DOMAIN.get(target, 0)  # Default to 0 if target not found
+                    
+                    # Create publisher for this target with domain format
                     pub = self.create_publisher(
                         msg_class,
-                        f"{topic}/{target}",
+                        f"/domain{domain_num}{topic}",
                         10
                     )
                     self.topic_to_dialogue[topic].add_target(target, pub)

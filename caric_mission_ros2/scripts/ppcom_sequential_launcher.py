@@ -28,8 +28,8 @@ def main():
     # Get the directory where this script is located
     script_dir = Path(__file__).parent.absolute()
     
-    router_script = script_dir / "ppcom_router_new.py"
-    call_script = script_dir / "ppcom_call_new.py"
+    router_script = script_dir / "ppcom_router.py"
+    call_script = script_dir / "ppcom_call.py"
     
     if not router_script.exists():
         print(f"ERROR: Router script not found at {router_script}")
