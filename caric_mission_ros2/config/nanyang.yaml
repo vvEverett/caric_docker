@@ -47,27 +47,27 @@ topics:
     type: sensor_msgs/msg/PointCloud2
     remap: jurong/slf_kf_cloud
 
-  /domain5/nanyang/cloud_inW:
+  /domain5/changi/cloud_inW:
     type: sensor_msgs/msg/PointCloud2
-    remap: nanyang/cloud_inW
-  /domain5/nanyang/detected_interest_points:
+    remap: changi/cloud_inW
+  /domain5/changi/detected_interest_points:
     type: sensor_msgs/msg/PointCloud2
-    remap: nanyang/detected_interest_points
-  /domain5/nanyang/gimbal:
+    remap: changi/detected_interest_points
+  /domain5/changi/gimbal:
     type: geometry_msgs/msg/TwistStamped
-    remap: nanyang/gimbal
-  /domain5/nanyang/ground_truth/odometry:
+    remap: changi/gimbal
+  /domain5/changi/ground_truth/odometry:
     type: nav_msgs/msg/Odometry
-    remap: nanyang/ground_truth/odometry
-  /domain5/nanyang/nbr_kf_cloud:
+    remap: changi/ground_truth/odometry
+  /domain5/changi/nbr_kf_cloud:
     type: sensor_msgs/msg/PointCloud2
-    remap: nanyang/nbr_kf_cloud
-  /domain5/nanyang/nbr_odom_cloud:
+    remap: changi/nbr_kf_cloud
+  /domain5/changi/nbr_odom_cloud:
     type: sensor_msgs/msg/PointCloud2
-    remap: nanyang/nbr_odom_cloud
-  /domain5/nanyang/slf_kf_cloud:
+    remap: changi/nbr_odom_cloud
+  /domain5/changi/slf_kf_cloud:
     type: sensor_msgs/msg/PointCloud2
-    remap: nanyang/slf_kf_cloud
+    remap: changi/slf_kf_cloud
 
   /domain5/raffles/cloud_inW:
     type: sensor_msgs/msg/PointCloud2
@@ -114,11 +114,11 @@ topics:
     remap: sentosa/slf_kf_cloud
 
   # Command
-  /changi/command/gimbal:
+  /nanyang/command/gimbal:
     type: geometry_msgs/msg/Twist
     from_domain: 5
     to_domain: 0
-  /changi/command/trajectory:
+  /nanyang/command/trajectory:
     type: trajectory_msgs/msg/MultiDOFJointTrajectory
     from_domain: 5
     to_domain: 0
