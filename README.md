@@ -97,7 +97,7 @@ For detailed instructions, see the [caric_mission_ros2 README](caric_mission_ros
 
 ### View ROS2 Topic List
 
-To view topics in a specific ROS2 domain, set the `ROS_DOMAIN_ID` environment variable. 
+To view topics in a specific ROS2 domain, set the `ROS_DOMAIN_ID` environment variable.  
 For example:
 ```bash
 docker exec -it ros_caric_drone bash
