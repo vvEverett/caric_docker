@@ -33,17 +33,41 @@ Open a new terminal and enter the ROS2 container in domain 0 to run the PPCom ro
 docker exec -it ros_caric_drone bash
 ros2 launch caric_mission_ros2 multi_bridge.launch.py
 ```
+### Step 4: Run Talker Nodes (for Testing Ping/Message)
 
-### Step 4: Run Domain Bridge
-In another terminal of the same ROS2 container, run the domain bridge:
+This step is only for testing the ping/message functionality between nodes.
 
+Open separate terminals for each drone talker node. Each node should run in the ROS2 container:
+
+For Sentosa talker:
 ```bash
 docker exec -it ros_caric_drone bash
-export ROS_DOMAIN_ID=0
-ros2 run domain_bridge domain_bridge domain_bridge.yaml
+ros2 run caric_mission_ros2 ppcom_sentosa_talker.py
 ```
 
-### Step 5: Run Talker Nodes
+For Raffles talker:
+```bash
+docker exec -it ros_caric_drone bash
+ros2 run caric_mission_ros2 ppcom_raffles_talker.py
+```
+
+For Jurong talker:
+```bash
+docker exec -it ros_caric_drone bash
+ros2 run caric_mission_ros2 ppcom_jurong_talker.py
+```
+
+For Nanyang talker:
+```bash
+docker exec -it ros_caric_drone bash
+ros2 run caric_mission_ros2 ppcom_nanyang_talker.py
+```
+
+For Changi talker:
+```bash
+docker exec -it ros_caric_drone bash
+ros2 run caric_mission_ros2 ppcom_changi_talker.py
+```
 Open separate terminals for each drone talker node. Each node should run in the ROS2 container:
 
 For Sentosa talker:

@@ -83,7 +83,6 @@ Each node is assigned a domain ID using the `TARGET_TO_DOMAIN` mapping:
 | 99        | Ground Control Station   |
 
 You can modify the configuration files in `caric_mission_ros2/config` to adjust:
-- Topic mapping relationships
 - Message routing rules between domains
 - Communication parameters and frequency
 - Message reception strategies for each UAV node
@@ -99,15 +98,14 @@ For detailed instructions, see the [caric_mission_ros2 README](caric_mission_ros
 ### View ROS2 Topic List
 
 To view topics in a specific ROS2 domain, set the `ROS_DOMAIN_ID` environment variable. For example:
-
 ```bash
 docker exec -it ros_caric_drone bash
 export ROS_DOMAIN_ID=1
 ros2 topic list
 ```
+> **Notice:** The topics you see here are processed through the Line-of-Sight (LOS) communication mechanism.
 
 Set `ROS_DOMAIN_ID` to the desired domain number to see all ROS2 topics in that domain. This is useful for debugging cross-domain communication and topic mapping.
-
 
 The file `bridge.param` governs the topics to be bridged from ROS1 to ROS2.
 
