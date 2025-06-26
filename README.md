@@ -81,4 +81,101 @@ The file `domain_bridge.yaml` governs the topics to be transferred across domain
 
 The file `bridge.param` governs the topics to be bridged from ROS1 to ROS2.
 
-Remember to run `docker compose down` to shut down the containers when you finish running.
+**Note**: You can adjust message transmission between domains by modifying the configuration files (`domain_bridge.yaml` and `bridge.param`).
+
+### Configuration Adjustment
+You can modify configuration files in the `caric_mission_ros2/config` directory to adjust how drones in different domains receive messages from ROS1. These configuration files allow you to customize:
+- Topic mapping relationships
+- Message routing rules between domains
+- Communication parameters and frequency settings
+- Drone node receiving strategies
+
+## Run PPCom (Point-to-Point Communication) System
+
+The PPCom system enables distributed communication between multiple drone nodes across different ROS2 domains. Follow these steps to run the complete system:
+
+### Step 1: Run CARIC in ROS1 Container
+First, start the ROS1 container and run the baseline or mission launch files:
+
+```bash
+xhost + # allowing docker access to screen
+docker exec -it ros_caric_container_1 bash # open a container terminal
+```
+
+To run the baseline method:
+```bash
+source devel/setup.bash
+roslaunch caric_baseline run.launch scenario:=mbs
+# or
+roslaunch caric_mission run_mbs.launch
+```
+
+### Step 2: Run ROS1-ROS2 Bridge
+Open a new terminal and start the bridge container:
+
+```bash
+docker exec -it ros_caric_bridge bash
+rosparam load bridge.param # load the ros1-ros2 bridge parameter
+ros2 run ros1_bridge parameter_bridge # run ros1_bridge
+```
+
+### Step 3: Run PPCom Router in Domain 0
+Open a new terminal and enter the ROS2 container in domain 0 to run the PPCom router:
+```bash
+docker exec -it ros_caric_drone bash
+ros2 launch caric_mission_ros2 multi_bridge.launch.py
+```
+
+### Step 4: Run Domain Bridge
+In another terminal of the same ROS2 container, run the domain bridge:
+
+```bash
+docker exec -it ros_caric_drone bash
+export ROS_DOMAIN_ID=0
+ros2 run domain_bridge domain_bridge domain_bridge.yaml
+```
+
+### Step 5: Run Talker Nodes
+Open separate terminals for each drone talker node. Each node should run in the ROS2 container:
+
+For Sentosa talker:
+```bash
+docker exec -it ros_caric_drone bash
+ros2 run caric_mission_ros2 ppcom_sentosa_talker.py
+```
+
+For Raffles talker:
+```bash
+docker exec -it ros_caric_drone bash
+ros2 run caric_mission_ros2 ppcom_raffles_talker.py
+```
+
+For Jurong talker:
+```bash
+docker exec -it ros_caric_drone bash
+ros2 run caric_mission_ros2 ppcom_jurong_talker.py
+```
+
+For Nanyang talker:
+```bash
+docker exec -it ros_caric_drone bash
+ros2 run caric_mission_ros2 ppcom_nanyang_talker.py
+```
+
+For Changi talker:
+```bash
+docker exec -it ros_caric_drone bash
+ros2 run caric_mission_ros2 ppcom_changi_talker.py
+```
+
+### Expected Output
+After running the talker nodes, you should see message sending and receiving status in the terminal output:
+- **Green text**: Successfully received messages from other nodes
+- **Red text**: No messages received from specific nodes
+- **Blue text**: Sending status indicators
+
+Each talker will periodically send ping messages and display the communication status with other nodes in the network.
+
+Remember to run `docker compose down` to shut down all containers when you finish running.
+
+
