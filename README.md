@@ -90,7 +90,7 @@ You can modify the configuration files in `caric_mission_ros2/config` to adjust:
 
 Customize these parameters to suit your multi-domain communication needs.
 
-## Run PPCom (Point-to-Point Communication) System
+## Run PPCom (Peer-to-Peer Communication) System
 
 The PPCom system enables distributed communication between multiple drone nodes across different ROS2 domains.
 

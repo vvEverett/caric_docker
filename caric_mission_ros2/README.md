@@ -1,4 +1,4 @@
-# PPCom (Point-to-Point Communication) System
+# PPCom (Peer-to-Peer Communication) System
 
 The PPCom system enables distributed communication between multiple drone nodes across different ROS2 domains. Follow these steps to run the complete system:
 
