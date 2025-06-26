@@ -72,15 +72,19 @@ The file `bridge.param` controls which topics are bridged from ROS1 to ROS2.
 
 Each node is assigned a domain ID using the `TARGET_TO_DOMAIN` mapping:
 
-| Domain ID | Node/Role                |
-|-----------|--------------------------|
-| 0         | Central domain           |
-| 1         | Jurong UAV               |
-| 2         | Raffles UAV              |
-| 3         | Sentosa UAV              |
-| 4         | Changi UAV               |
-| 5         | Nanyang UAV              |
-| 99        | Ground Control Station   |
+<palign="center">
+
+| Domain ID | Node                   |
+|:---------:|:----------------------:|
+| 0         | Central domain         |
+| 1         | Jurong UAV             |
+| 2         | Raffles UAV            |
+| 3         | Sentosa UAV            |
+| 4         | Changi UAV             |
+| 5         | Nanyang UAV            |
+| 99        | Ground Control Station |
+
+</p>
 
 You can modify the configuration files in `caric_mission_ros2/config` to adjust:
 - Message routing rules between domains
