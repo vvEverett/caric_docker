@@ -72,7 +72,7 @@ The file `bridge.param` controls which topics are bridged from ROS1 to ROS2.
 
 Each node is assigned a domain ID using the `TARGET_TO_DOMAIN` mapping:
 
-<palign="center">
+<p align="center">
 
 | Domain ID | Node                   |
 |:---------:|:----------------------:|
