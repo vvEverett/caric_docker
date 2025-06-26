@@ -33,7 +33,7 @@ Open a new terminal and enter the ROS2 container in domain 0 to run the PPCom ro
 docker exec -it ros_caric_drone bash
 ros2 launch caric_mission_ros2 multi_bridge.launch.py
 ```
-### Step 4: Run Talker Nodes (for Testing Ping/Message)
+### Step 4: Run Talker Nodes (Only for testing ping_message)
 
 This step is only for testing the ping/message functionality between nodes.
 
