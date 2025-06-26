@@ -74,7 +74,7 @@ Each node is assigned a domain ID using the `TARGET_TO_DOMAIN` mapping:
 
 | Domain ID | Node/Role                |
 |-----------|--------------------------|
-| 0         | Central domain (coordination/debugging) |
+| 0         | Central domain           |
 | 1         | Jurong UAV               |
 | 2         | Raffles UAV              |
 | 3         | Sentosa UAV              |
