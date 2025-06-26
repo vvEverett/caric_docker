@@ -68,37 +68,6 @@ For Changi talker:
 docker exec -it ros_caric_drone bash
 ros2 run caric_mission_ros2 ppcom_changi_talker.py
 ```
-Open separate terminals for each drone talker node. Each node should run in the ROS2 container:
-
-For Sentosa talker:
-```bash
-docker exec -it ros_caric_drone bash
-ros2 run caric_mission_ros2 ppcom_sentosa_talker.py
-```
-
-For Raffles talker:
-```bash
-docker exec -it ros_caric_drone bash
-ros2 run caric_mission_ros2 ppcom_raffles_talker.py
-```
-
-For Jurong talker:
-```bash
-docker exec -it ros_caric_drone bash
-ros2 run caric_mission_ros2 ppcom_jurong_talker.py
-```
-
-For Nanyang talker:
-```bash
-docker exec -it ros_caric_drone bash
-ros2 run caric_mission_ros2 ppcom_nanyang_talker.py
-```
-
-For Changi talker:
-```bash
-docker exec -it ros_caric_drone bash
-ros2 run caric_mission_ros2 ppcom_changi_talker.py
-```
 
 ### Expected Output
 After running the talker nodes, you should see message sending and receiving status in the terminal output:
