@@ -64,46 +64,45 @@ rosparam load bridge.param #load the ros1-ros2 bridge parameter
 ros2 run ros1_bridge parameter_bridge #run ros1_bridge
 ```
 
-```
-The file `bridge.param` governs the topics to be bridged from ROS1 to ROS2.
+The file `bridge.param` controls which topics are bridged from ROS1 to ROS2.
 
-**Note**: You can adjust message transmission between domains by modifying the configuration files (`bridge.param`).
+> **Note:** You can adjust message transmission between domains by editing the configuration files (such as `bridge.param`).
 
 ### Configuration Adjustment
 
-Each node is assigned a specific domain ID using the `TARGET_TO_DOMAIN` mapping:
+Each node is assigned a domain ID using the `TARGET_TO_DOMAIN` mapping:
 
-- **domain0**: Central domain for all messages, ideal for overall coordination and debugging.
-- **domain1**: Jurong UAV
-- **domain2**: Raffles UAV
-- **domain3**: Sentosa UAV
-- **domain4**: Changi UAV
-- **domain5**: Nanyang UAV
-- **domain99**: Ground Control Station
+| Domain ID | Node/Role                |
+|-----------|--------------------------|
+| 0         | Central domain (coordination/debugging) |
+| 1         | Jurong UAV               |
+| 2         | Raffles UAV              |
+| 3         | Sentosa UAV              |
+| 4         | Changi UAV               |
+| 5         | Nanyang UAV              |
+| 99        | Ground Control Station   |
 
-You can flexibly adjust the following by modifying the configuration files in the `caric_mission_ros2/config` directory:
+You can modify the configuration files in `caric_mission_ros2/config` to adjust:
 - Topic mapping relationships
 - Message routing rules between domains
 - Communication parameters and frequency
 - Message reception strategies for each UAV node
 
-Customize these parameters according to your multi-domain communication needs to achieve flexible cross-domain message management.
+Customize these parameters to suit your multi-domain communication needs.
 
 ## Run PPCom (Point-to-Point Communication) System
 
-The PPCom system enables distributed communication between multiple drone nodes across different ROS2 domains. 
+The PPCom system enables distributed communication between multiple drone nodes across different ROS2 domains.
 
-**For detailed PPCom system instructions, see: [caric_mission_ros2 README](./caric_mission_ros2/README.md)**
-
-Follow these steps to run the complete system:
+For detailed instructions, see the [caric_mission_ros2 README](caric_mission_ros2/README.md).
 
 ### View ROS2 Topic List
 
-You can view the list of topics in different ROS2 domains by setting the `ROS_DOMAIN_ID` environment variable. For example:
+To view topics in a specific ROS2 domain, set the `ROS_DOMAIN_ID` environment variable. For example:
 
 ```bash
 docker exec -it ros_caric_drone bash
-ROS_DOMAIN_ID=1
+export ROS_DOMAIN_ID=1
 ros2 topic list
 ```
 
