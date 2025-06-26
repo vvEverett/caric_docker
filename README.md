@@ -90,7 +90,17 @@ You can modify configuration files in the `caric_mission_ros2/config` directory 
 - Communication parameters and frequency settings
 - Drone node receiving strategies
 
-## Run PPCom (Point-to-Point Communication) System
+### View ROS2 Topic List
+
+You can view the list of topics in different ROS2 domains by setting the `ROS_DOMAIN_ID` environment variable. For example:
+
+```bash
+docker exec -it ros_caric_drone bash
+ROS_DOMAIN_ID=1
+ros2 topic list
+```
+
+Set `ROS_DOMAIN_ID` to the desired domain number to see all ROS2 topics in that domain. This is useful for debugging cross-domain communication and topic mapping.
 
 The PPCom system enables distributed communication between multiple drone nodes across different ROS2 domains. Follow these steps to run the complete system:
 
@@ -177,5 +187,4 @@ After running the talker nodes, you should see message sending and receiving sta
 Each talker will periodically send ping messages and display the communication status with other nodes in the network.
 
 Remember to run `docker compose down` to shut down all containers when you finish running.
-
 
